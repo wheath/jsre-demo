@@ -10,7 +10,8 @@
           document.addEventListener("deviceready", onDeviceReady, true);
      }
      function onDeviceReady(){
-          navigator.notification.alert("PhoneGap is working!!");
+          winddow.alert = navigator.notification.alert;
+          alert("PhoneGap is working!!");
      }
     </script>
     <title>JSRE-Demo</title>
