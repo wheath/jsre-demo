@@ -1,10 +1,10 @@
 
 
-function onLoad(){
+function onLoad() {
   document.addEventListener("deviceready", onDeviceReady, true);
 }
 
-function onDeviceReady(){
+function onDeviceReady() {
   window.alert = navigator.notification.alert;
   alert("PhoneGap version 1.0.8");
 }
