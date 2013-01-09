@@ -1,11 +1,10 @@
-function onLoad() {
-        document.addEventListener("deviceready", onDeviceReady, false);
-    }
+
+window.alert = notification.alert;
+document.addEventListener('deviceready', function(){alert('Hi there');}, true);
+
 
 // Cordova is loaded and it is now safe to make calls Cordova methods
-function onDeviceReady() {
 // Now safe to use the Cordova API
-   alert('_dbg in onDeviceReady'); 
    //var re = setup_re();
    //var q_ram = new Rule('choose_ram');
    //var term_X = new Term('X');
@@ -13,4 +12,3 @@ function onDeviceReady() {
    //re.fireRule(q_ram);
    
    //re.handleQueryResult(q_ram);
-}
