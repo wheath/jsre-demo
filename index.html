@@ -5,19 +5,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="stylesheet" href="assets/css/master.css" type="text/css" media="screen" />
     <script src="phonegap.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/expert_system_combined.js"></script>    
-    <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+      function onLoad(){
+          document.addEventListener("deviceready", onDeviceReady, true);
+     }
+     function onDeviceReady(){
+          navigator.notification.alert("PhoneGap is working!!");
+     }
+    </script>
     <title>JSRE-Demo</title>
   </head>
-<body>
-
+<body onload="onLoad();">
   <header>
     <h1>JSRE-Demo</h1>
   </header>
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.2</div>
+        <div class="app_button" id="version_button">Version 1.0.3</div>
       </div>
     </div>
   </div>
