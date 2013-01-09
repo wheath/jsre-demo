@@ -6,7 +6,7 @@ function onLoad() {
 
 function onDeviceReady() {
   window.alert = navigator.notification.alert;
-  alert("PhoneGap version 1.0.8");
+  alert("PhoneGap version 1.0.10");
 }
 
 // Cordova is loaded and it is now safe to make calls Cordova methods
