@@ -14,7 +14,7 @@ var Util = (function () {
     Util.output = function output(s) {
         if(Util.is_in_browser()) {
             document.getElementById('output_div').innerHTML = s;
-            window.prompt(s, '');
+            window.prompt(s, 'info only, just press ok');
         } else {
             console.log(s + '\n');
         }
@@ -26,7 +26,7 @@ var Util = (function () {
             console.log("_dbg rule_firing # b_args: " + re.rule_firing.b_args.length);
         }
         if(Util.is_in_browser()) {
-            var input_str = window.prompt("Enter input", "Type your input here");
+            var input_str = window.prompt("Enter input", "Enter yes or no");
             re.handleAsyncInput(input_str);
         } else {
             var prompt = require('prompt');
@@ -669,7 +669,7 @@ function onDeviceReady() {
       <div id='output_div'>
       </div>
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.18</div>
+        <div class="app_button" id="version_button">Version 1.0.20</div>
       </div>
     </div>
   </div>
