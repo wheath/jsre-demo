@@ -2,12 +2,12 @@
 <widget xmlns		= "http://www.w3.org/ns/widgets"
 	xmlns:gap	= "http://phonegap.com/ns/1.0"
 	id		= "com.jsrules.demo2"
-	version 	= "1.0.17">
+	version 	= "1.0.18">
 
-	<name>JSRE-Demo2</name>
+	<name>JSRE-Demo</name>
 
 	<description>
-		Javascript Rules Engine Demo2
+		Javascript Rules Engine Demo
 	</description>
 
 	<author href="http://wgheath.github.com"
