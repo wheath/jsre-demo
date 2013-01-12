@@ -14,6 +14,7 @@ var Util = (function () {
     Util.output = function output(s) {
         if(Util.is_in_browser()) {
             document.getElementById('output_div').innerHTML = s;
+            window.prompt(s, '');
         } else {
             console.log(s + '\n');
         }
@@ -50,7 +51,7 @@ var Util = (function () {
     }
     return Util;
 })();
-var is_debug = true;
+var is_debug = false;
 var Types = (function () {
     function Types() { }
     Types.types = [];
