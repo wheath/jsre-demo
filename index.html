@@ -51,7 +51,7 @@ var Util = (function () {
     }
     return Util;
 })();
-var is_debug = true;
+var is_debug = false;
 var Types = (function () {
     function Types() { }
     Types.types = [];
@@ -236,6 +236,7 @@ var RuleEngine = (function () {
     RuleEngine.is_back_tracking = false;
     RuleEngine.input_cb = undefined;
     RuleEngine.prototype.handleBaseQueryFinish = function () {
+        return;
         if(RuleEngine.async_hold) {
             return;
         }
@@ -857,7 +858,7 @@ function onLoad() {
 function onDeviceReady() {
   // Cordova is loaded and it is now safe to make calls Cordova methods
   // Now safe to use the Cordova API
-  window.alert = navigator.notification.alert;
+  //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
 
   var re = setup_re();
@@ -879,7 +880,7 @@ function onDeviceReady() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.22</div>
+        <div class="app_button" id="version_button">Version 1.0.21</div>
       </div>
       <div id='output_div'>
       </div>
