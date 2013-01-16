@@ -786,7 +786,7 @@ function onDeviceReady() {
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
   //
-  document.getElementById('submit_btn').disabled = 1;
+  document.getElementById('control_div').display = "none";
 
   RuleEngine.reset();
   var re = setup_re();
@@ -796,7 +796,8 @@ function onDeviceReady() {
   RuleEngine.base_query = q_ram;
 
   re.fireRule(q_ram);
-  document.getElementById('submit_btn').disabled = 0;
+
+  document.getElementById('control_div').display = "inline";
    
 }
     </script>
@@ -810,7 +811,7 @@ function onDeviceReady() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.37</div>
+        <div class="app_button" id="version_button">Version 1.0.38</div>
       </div>
       <div id='output_div'>
       </div>
@@ -823,7 +824,7 @@ function onDeviceReady() {
       </div>
       <div id='control_div'>
         <form name='control_form' method="POST" onsubmit="return false;">
-          <input type="submit" value="Start Expert System" id="submit_btn" onclick="onDeviceReady();">
+          <input type="submit" value="Start Expert System" onclick="onDeviceReady();">
         </form>
       </div>
     </div>
