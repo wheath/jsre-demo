@@ -94,3 +94,7 @@ h1{
   color:#000;
 }
 
+#control_div {
+  display: none;
+}
+
