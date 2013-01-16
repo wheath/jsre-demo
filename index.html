@@ -786,7 +786,8 @@ function onDeviceReady() {
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
   //
-  document.getElementById('control_div').display = "none";
+  var ctrl_div = document.getElementById("control_div");
+  ctrl_div.style.display = "none";
 
   RuleEngine.reset();
   var re = setup_re();
@@ -797,7 +798,7 @@ function onDeviceReady() {
 
   re.fireRule(q_ram);
 
-  document.getElementById('control_div').display = "inline";
+  ctrl_div.style.display = "inline";
    
 }
     </script>
@@ -811,7 +812,7 @@ function onDeviceReady() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.38</div>
+        <div class="app_button" id="version_button">Version 1.0.40</div>
       </div>
       <div id='output_div'>
       </div>
