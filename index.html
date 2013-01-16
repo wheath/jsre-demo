@@ -14,20 +14,20 @@ var Util = (function () {
     Util.output = function output(s) {
         if(Util.is_in_browser()) {
             document.getElementById('output_div').innerHTML = s;
-            window.prompt(s, 'info only, just press ok');
         } else {
             console.log(s + '\n');
         }
     }
-    Util.input = function input(re) {
-        re.async_hold = true;
+    Util.input = function input(cb) {
+        RuleEngine.async_hold = true;
         if(is_debug) {
             console.log("_dbg in input");
-            console.log("_dbg rule_firing # b_args: " + re.rule_firing.b_args.length);
+            console.log("_dbg rule_firing # b_args: " + RuleEngine.rule_firing.b_args.length);
         }
         if(Util.is_in_browser()) {
-            var input_str = window.prompt("Enter input", "Enter yes or no");
-            re.handleAsyncInput(input_str);
+            var input_div = document.getElementById("input_div");
+            input_div.style.display = "inline";
+            RuleEngine.input_cb = cb;
         } else {
             var prompt = require('prompt');
             prompt.start();
@@ -41,7 +41,7 @@ var Util = (function () {
                     console.log('Command-line input received:');
                     console.log('  input_str: ' + result.input_str);
                 }
-                re.handleAsyncInput(result.input_str);
+                cb(result.input_str);
             });
             function onErr(err) {
                 console.log(err);
@@ -170,8 +170,14 @@ var Rule = (function () {
         this.proven = false;
     }
     Rule.prototype.deepcopy = function () {
+        if(is_debug) {
+            console.log("_dbg in Rule.deepcopy");
+        }
         var rule_copy = new Rule(this.name);
         for(var i = 0; i < this.args.length; i++) {
+            if(is_debug) {
+                console.log("_dbg about to call deepcopy on arg with name: " + this.args[i].name);
+            }
             rule_copy.args.unshift(this.args[i].deepcopy());
         }
         for(var r = 0; r < this.rules.length; r++) {
@@ -186,6 +192,9 @@ var Rule = (function () {
         }
         rule_copy.proven = this.proven;
         rule_copy.solutions = this.solutions;
+        if(is_debug) {
+            console.log("_dbg about to return from Rule.deepcopy");
+        }
         return rule_copy;
     };
     Rule.prototype.addArg = function (arg) {
@@ -215,17 +224,42 @@ var Choice = (function () {
 })();
 Types.registerType('Choice', Choice);
 var RuleEngine = (function () {
-    function RuleEngine() {
-        this.rules = [];
-        this.body_rules = [];
-        this.async_hold = false;
-    }
+    function RuleEngine() { }
+    RuleEngine.re_inst = 0;
+    RuleEngine.rules = [];
     RuleEngine.choices = [];
+    RuleEngine.body_rules = [];
+    RuleEngine.rule_firing = null;
+    RuleEngine.body_rule_firing = null;
+    RuleEngine.async_hold = false;
+    RuleEngine.base_query = null;
+    RuleEngine.is_back_tracking = false;
+    RuleEngine.input_cb = undefined;
+    RuleEngine.prototype.handleBaseQueryFinish = function () {
+        if(RuleEngine.async_hold) {
+            return;
+        }
+        if(is_debug) {
+            console.log("_dbg in handleBaseQueryFinish");
+        }
+        if(RuleEngine.body_rules.length == 0) {
+            if(is_debug) {
+                console.log("_dbg base_query == r, about to call handleQueryResult");
+            }
+            this.handleQueryResult();
+        }
+    };
+    RuleEngine.getREInst = function getREInst() {
+        if(!RuleEngine.re_inst) {
+            RuleEngine.re_inst = new RuleEngine();
+        }
+        return RuleEngine.re_inst;
+    }
     RuleEngine.prototype.addBodyRule = function (rule) {
-        this.body_rules.unshift(rule);
+        RuleEngine.body_rules.unshift(rule);
     };
     RuleEngine.prototype.addRule = function (rule) {
-        this.rules.unshift(rule);
+        RuleEngine.rules.unshift(rule);
     };
     RuleEngine.getTypeName = function getTypeName(inst) {
         var typeName = undefined;
@@ -236,19 +270,24 @@ var RuleEngine = (function () {
         }
         return typeName;
     }
-    RuleEngine.prototype.findArg = function (name, args) {
+    RuleEngine.findArg = function findArg(name, args) {
         for(var i = 0; i < args.length; i++) {
             if(name == args[i].name) {
                 return args[i];
             }
         }
-    };
+    }
     RuleEngine.prototype.backTrack = function () {
         var is_backTracked = false;
         var found_choice = undefined;
-        this.rule_firing = undefined;
-        this.body_rule_firing = undefined;
-        this.body_rules = [];
+        RuleEngine.is_back_tracking = true;
+        RuleEngine.rule_firing = undefined;
+        RuleEngine.body_rule_firing = undefined;
+        RuleEngine.body_rules = [];
+        if(is_debug) {
+            console.log("_dbg in backTrack");
+            console.log("_dbg RuleEngine.choices.length: " + RuleEngine.choices.length);
+        }
         while(!is_backTracked) {
             if(RuleEngine.choices.length > 0) {
                 var choice_or_term = RuleEngine.choices.pop();
@@ -344,32 +383,48 @@ var RuleEngine = (function () {
         }
     };
     RuleEngine.prototype.prepareToFire = function (query, rule) {
+        if(is_debug) {
+            console.log("_dbg in prepareToFire");
+        }
         var rule_copy = rule.deepcopy();
         this.unifyRuleHeaders(query, rule_copy);
         return rule_copy;
     };
     RuleEngine.prototype.popBodyRule = function () {
-        if(!this.async_hold) {
+        if(!RuleEngine.async_hold) {
             if(is_debug) {
                 console.log("_dbg about to pop a body rule");
-                console.log("_dbg this.body_rules.length: " + this.body_rules.length);
+                console.log("_dbg RuleEngine.body_rules.length: " + RuleEngine.body_rules.length);
             }
-            this.body_rule_firing = this.body_rules.pop();
+            RuleEngine.body_rule_firing = RuleEngine.body_rules.pop();
         }
     };
     RuleEngine.prototype.handleAsyncInput = function (input_str) {
         if(is_debug) {
             console.log("_dbg in handleAsyncInput");
         }
-        this.async_hold = false;
-        var header = this.rule_firing;
-        var bodyRule = this.body_rule_firing;
+        RuleEngine.async_hold = false;
+        var re = RuleEngine.getREInst();
+        var header = RuleEngine.rule_firing;
+        var bodyRule = RuleEngine.body_rule_firing;
+        if(bodyRule) {
+            if(is_debug) {
+                console.log("_dbg bodyRule is defined");
+            }
+        } else {
+            if(is_debug) {
+                console.log("_dbg bodyRule is not defined");
+            }
+        }
+        if(is_debug) {
+            console.log("_dbg bodyRule.name: " + bodyRule.name);
+        }
         var r = /^i\((.*)\)/;
         var arg_name = bodyRule.name.match(r)[1];
         console.log("\n");
-        var arg = this.findArg(arg_name, header.args);
+        var arg = RuleEngine.findArg(arg_name, header.args);
         if(!arg) {
-            arg = this.findArg(arg_name, header.b_args);
+            arg = RuleEngine.findArg(arg_name, header.b_args);
         }
         if(!arg) {
             if(is_debug) {
@@ -385,7 +440,7 @@ var RuleEngine = (function () {
         if(is_debug) {
             console.log("_dbg num header.b_args: " + header.b_args.length);
         }
-        this.handleNonCallAsync(false);
+        re.handleNonCallAsync(false);
     };
     RuleEngine.prototype.handleNonCallBodyRule = function (header, bodyRule) {
         if(is_debug) {
@@ -400,12 +455,12 @@ var RuleEngine = (function () {
                 console.log("_dbg num header args: " + header.args.length + "\n");
                 console.log("_dbg num header b_args: " + header.b_args.length + "\n");
             }
-            var arg = this.findArg(n[0], header.args);
+            var arg = RuleEngine.findArg(n[0], header.args);
             if(!arg) {
                 if(is_debug) {
                     console.log("_dbg header.b_args: " + JSON.stringify(header.b_args) + "\n");
                 }
-                arg = this.findArg(n[0], header.b_args);
+                arg = RuleEngine.findArg(n[0], header.b_args);
             }
             if(is_debug) {
                 console.log("_dbg arg name: " + arg.name + "\n");
@@ -417,9 +472,9 @@ var RuleEngine = (function () {
         } else {
             if(bodyRule.name.indexOf('=') > -1) {
                 var n = bodyRule.name.split('=');
-                var arg = this.findArg(n[0], header.args);
+                var arg = RuleEngine.findArg(n[0], header.args);
                 if(!arg) {
-                    arg = this.findArg(n[0], header.b_args);
+                    arg = RuleEngine.findArg(n[0], header.b_args);
                 }
                 if(!arg) {
                     if(is_debug) {
@@ -453,7 +508,7 @@ var RuleEngine = (function () {
                                 if(is_debug) {
                                     console.log("_dbg input into varible: " + arg_name);
                                 }
-                                Util.input(this);
+                                Util.input(this.handleAsyncInput);
                             }
                         }
                     }
@@ -470,12 +525,15 @@ var RuleEngine = (function () {
         if(is_debug) {
             console.log("_dbg processing rule name: " + call_rule.name + " as a call");
         }
-        var foundRules = this.searchRules(this.rules, call_rule.name, call_rule.args);
+        var foundRules = this.searchRules(RuleEngine.rules, call_rule.name, call_rule.args);
         if(is_debug) {
             console.log("_dbg num rules found: " + foundRules.length + "\n");
         }
         this.handleFoundRules(call_rule, foundRules);
         if(foundRules.length) {
+            if(is_debug) {
+                console.log("_dbg foundRules[0].rules.length: " + foundRules[0].rules.length);
+            }
             var rule_copy = this.prepareToFire(call_rule, foundRules[0]);
             return rule_copy;
         }
@@ -483,17 +541,17 @@ var RuleEngine = (function () {
     RuleEngine.prototype.handleNonCallAsync = function (is_fail) {
         if(is_debug) {
             console.log("_dbg in handleNonCallAsync");
-            console.log("_dbg this.async_hold: " + this.async_hold);
-            if(this.rule_firing.b_args.length > 0) {
-                console.log("this.rule_firing.b_args[0].getGrounded(): " + this.rule_firing.b_args[0].getGrounded());
+            console.log("_dbg RuleEngine.async_hold: " + RuleEngine.async_hold);
+            if(RuleEngine.rule_firing.b_args.length > 0) {
+                console.log("RuleEngine.rule_firing.b_args[0].getGrounded(): " + RuleEngine.rule_firing.b_args[0].getGrounded());
             }
         }
-        if(this.async_hold) {
+        if(RuleEngine.async_hold) {
             return;
         }
-        if(!this.async_hold) {
+        if(!RuleEngine.async_hold) {
             if(is_debug) {
-                console.log("_dbg this.async_hold is false");
+                console.log("_dbg RuleEngine.async_hold is false");
             }
             if(is_fail) {
                 if(is_debug) {
@@ -506,14 +564,18 @@ var RuleEngine = (function () {
                 console.log("_dbg about to call handleBodyRule");
             }
             this.handleBodyRule();
+            this.handleBaseQueryFinish();
         }
     };
     RuleEngine.prototype.handleBodyRule = function () {
-        if(this.async_hold) {
+        if(RuleEngine.async_hold) {
+            if(is_debug) {
+                console.log("_dbg async_hold is true not executing body rule");
+            }
             return;
         }
-        var header = this.rule_firing;
-        var bodyRule = this.body_rule_firing;
+        var header = RuleEngine.rule_firing;
+        var bodyRule = RuleEngine.body_rule_firing;
         if(!bodyRule) {
             return;
         }
@@ -528,19 +590,28 @@ var RuleEngine = (function () {
         }
     };
     RuleEngine.prototype.fireRule = function (r) {
-        this.rule_firing = r;
+        RuleEngine.rule_firing = r;
         if(is_debug) {
             console.log("_dbg firing rule: " + r.name + "\n");
-            console.log("_dbg1 r.args[0]: " + RuleEngine.getTypeName(r.args[0]));
+            console.log("_dbg r.rules.length: " + r.rules.length);
+            console.log("_dbg r.args[0]: " + RuleEngine.getTypeName(r.args[0]));
         }
         if(r.is_query()) {
             if(is_debug) {
                 console.log("_dbg executing query rule: " + r.name + "\n");
             }
             var rule_copy = this.prepareToCall(r);
+            if(is_debug) {
+                console.log("_dbg about to fire rule_copy with name: " + rule_copy.name);
+                console.log("_dbg  rule_copy.rules.length: " + rule_copy.rules.length);
+            }
             this.fireRule(rule_copy);
-            if(this.async_hold) {
+            if(RuleEngine.async_hold) {
                 return;
+            }
+        } else {
+            if(is_debug) {
+                console.log("_dbg rule: " + r.name + " is not a query\n");
             }
         }
         for(var l in r.rules) {
@@ -562,14 +633,45 @@ var RuleEngine = (function () {
         }
         return is_solved;
     };
+    RuleEngine.prototype.handleFindMoreSolutions = function (input_str) {
+        if(is_debug) {
+            console.log("_dbg in handleFireMoreSolutions");
+        }
+        RuleEngine.async_hold = false;
+        if(input_str == 'yes') {
+            var re = RuleEngine.getREInst();
+            re.backTrack();
+        }
+    };
+    RuleEngine.prototype.handleQueryResult = function () {
+        var q = RuleEngine.base_query;
+        var output_ar = [];
+        if(this.isQuerySolved(q.args)) {
+            output_ar.push('Query: ' + q.name + ' was solved, solutions are: \n');
+            for(var i = 0; i < q.args.length; i++) {
+                output_ar.push('arg name: ' + q.args[i].name + ' ground val: ' + q.args[i].getGrounded() + '\n');
+            }
+        } else {
+            output_ar.push('Query: ' + q.name + ' was not solved\n');
+        }
+        if(RuleEngine.choices.length > 0) {
+            if(is_debug) {
+                console.log("_dbg RuleEngine.choices.length: " + RuleEngine.choices.length);
+            }
+            output_ar.push('There are other possible solutions, should the solver continue?\n');
+            Util.output(output_ar.join(''));
+            Util.input(this.handleFindMoreSolutions);
+        }
+    };
     return RuleEngine;
 })();
 function setup_re() {
-  var re = new RuleEngine();
+  var re = RuleEngine.getREInst();
 
   var small_ram_term = new Term('X');
   var small_ram_rule = new Rule('choose_ram');
   small_ram_rule.addArg(small_ram_term);
+
 
   var small_o1 = new Rule('o(Do you want a small amount of Ram?)');
   re.addRule(small_o1);
@@ -588,6 +690,7 @@ function setup_re() {
   small_ram_rule.addRule(small_X);
 
   re.addRule(small_ram_rule);
+
 
   var med_ram_term = new Term('X');
   var med_ram_rule = new Rule('choose_ram');
@@ -636,6 +739,115 @@ function setup_re() {
   return re;
 }
 
+  var re = setup_re();
+  var q_ram = new Rule('choose_ram');
+  var term_X = new Term('X');
+  q_ram.addArg(term_X);
+  RuleEngine.base_query = q_ram;
+
+  re.fireRule(q_ram);
+
+  if(is_debug) {
+    console.log("_dbg after fireRule\n\n\n");
+    console.log("_dbg RuleEngine.body_rule_firing.name: " + RuleEngine.body_rule_firing.name);
+  }
+
+  //re.handleQueryResult(q_ram);
+   
+  //console.log("_dbg first solution term_X.getGrounded(): " + term_X.getGrounded());
+  /*
+  console.log("_dbg num choice points: " + RuleEngine.choices.length);
+  if(term_X2.isGrounded()) {
+    console.log("_dbg pushing first solution");
+    q_human.solutions.push(term_X2.getGrounded());
+  }
+  if(RuleEngine.choices.length >0){ 
+    do {
+      re.backTrack();
+      if(term_X2.isGrounded()) {
+        console.log("_dbg next solution term_X2.getGrounded(): " + term_X2.getGrounded());
+        console.log("_dbg pushing next solution");
+        q_human.solutions.push(term_X2.getGrounded());
+      }
+    } while(RuleEngine.choices.length >0); 
+
+  }
+  console.log("_dbg total solutions found for q_human query: " + q_human.solutions.length);
+    
+  test.equal(q_human.solutions[0], 2);
+  test.equal(q_human.solutions[1], 1);
+  test.done();
+};
+
+exports.testCut = function(test) {
+  var re = new RuleEngine();
+
+  var term_X = new Term('X');
+  var test_rule = new Rule('human');
+  test_rule.addArg(term_X);
+  var test_clause = new Rule('X=2');
+  test_rule.addRule(test_clause);
+  var test_clause = new Rule('!');
+  test_rule.addRule(test_clause);
+
+  re.addRule(test_rule);
+
+  var term_X = new Term('X');
+  var test_rule = new Rule('human');
+  test_rule.addArg(term_X);
+  var test_clause = new Rule('X=1');
+  test_rule.addRule(test_clause);
+
+  re.addRule(test_rule);
+
+  var q_human= new Rule('human');
+  var term_X2 = new Term('X');
+  q_human.addArg(term_X2);
+  re.fireRule(q_human);
+ 
+  console.log("_dbg first solution term_X2.getGrounded(): " + term_X2.getGrounded());
+  console.log("_dbg num choice points: " + RuleEngine.choices.length);
+  if(term_X2.isGrounded()) {
+    console.log("_dbg pushing first solution");
+    q_human.solutions.push(term_X2.getGrounded());
+  }
+  if(RuleEngine.choices.length >0){ 
+    do {
+      re.backTrack();
+      if(term_X2.isGrounded()) {
+        console.log("_dbg next solution term_X2.getGrounded(): " + term_X2.getGrounded());
+        console.log("_dbg pushing next solution");
+        q_human.solutions.push(term_X2.getGrounded());
+      }
+    } while(RuleEngine.choices.length >0); 
+
+  }
+  console.log("_dbg total solutions found for q_human query: " + q_human.solutions.length);
+    
+  test.equal(q_human.solutions[0], 2);
+  test.equal(q_human.solutions.length, 1);
+  test.done();
+};
+*/
+
+function handle_binary_input() {
+  console.log("_dbg in handle_binary_input");
+  var oRadio = document.forms[0].elements['binary_input'];
+  var radio_val = '';
+ 
+   for(var i = 0; i < oRadio.length; i++)
+   {
+      if(oRadio[i].checked)
+      {
+         radio_val = oRadio[i].value;
+      }
+   }
+
+   console.log("_dbg radio_val: " + radio_val);
+   var input_div = document.getElementById("input_div");
+   input_div.style.display = "none";
+   RuleEngine.input_cb(radio_val);
+}
 
 
 function onLoad() {
@@ -658,7 +870,7 @@ function onDeviceReady() {
 }
     </script>
 
-    <title>JSRE-Demo2</title>
+    <title>JSRE-Demo</title>
   </head>
 <body onload="onLoad();">
   <header>
@@ -666,10 +878,17 @@ function onDeviceReady() {
   </header>
   <div id="wrapper">
     <div id="main-content">
+      <div align="center">
+        <div class="app_button" id="version_button">Version 1.0.21</div>
+      </div>
       <div id='output_div'>
       </div>
-      <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.20</div>
+      <div id='input_div'>
+        <form name='input_form' method="POST" onsubmit="return false;">
+          <input type="radio" name="binary_input" value="yes">Yes<br>
+          <input type="radio" name="binary_input" value="no">No
+          <input type="submit" value="Submit" onclick="handle_binary_input();">
+        </form>
       </div>
     </div>
   </div>
