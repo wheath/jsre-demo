@@ -85,3 +85,12 @@ h1{
   text-align: center;
 }
 
+#output_div {
+  color:#000;
+}
+
+#input_div {
+  display: none;
+  color:#000;
+}
+
