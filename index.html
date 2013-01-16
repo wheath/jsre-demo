@@ -881,6 +881,8 @@ function onDeviceReady2() {
   var q_ram = new Rule('choose_ram');
   var term_X = new Term('X');
   q_ram.addArg(term_X);
+  RuleEngine.base_query = q_ram;
+
   re.fireRule(q_ram);
    
   //re.handleQueryResult(q_ram);
@@ -896,7 +898,7 @@ function onDeviceReady2() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.33</div>
+        <div class="app_button" id="version_button">Version 1.0.34</div>
       </div>
       <div id='output_div'>
       </div>
