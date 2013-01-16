@@ -1,17 +1,29 @@
     </script>
 
-    <title>JSRE-Demo2</title>
+    <title>JSRE-Demo</title>
   </head>
-<body onload="onLoad();">
+<body>
   <header>
     <h1>JSRE-Demo2</h1>
   </header>
   <div id="wrapper">
     <div id="main-content">
+      <div align="center">
+        <div class="app_button" id="version_button">Version 1.0.25</div>
+      </div>
       <div id='output_div'>
       </div>
-      <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.18</div>
+      <div id='input_div'>
+        <form name='input_form' method="POST" onsubmit="return false;">
+          <input type="radio" name="binary_input" value="yes">Yes<br>
+          <input type="radio" name="binary_input" value="no">No
+          <input type="submit" value="Submit" onclick="handle_binary_input();">
+        </form>
+      </div>
+      <div id='control_div'>
+        <form name='control_form' method="POST" onsubmit="return false;">
+          <input type="submit" value="Start Expert System" onclick="start_es();">
+        </form>
       </div>
     </div>
   </div>
