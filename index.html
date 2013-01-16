@@ -644,17 +644,24 @@ var RuleEngine = (function () {
         }
     };
     RuleEngine.prototype.handleQueryResult = function () {
+        console.log("_dbg in handleQueryResult 1");
         var q = RuleEngine.base_query;
+        console.log("_dbg in handleQueryResult 2");
         var output_ar = [];
+        console.log("_dbg in handleQueryResult 3");
         if(this.isQuerySolved(q.args)) {
+            console.log("_dbg in handleQueryResult 4");
             output_ar.push('Query: ' + q.name + ' was solved, solutions are: \n');
             for(var i = 0; i < q.args.length; i++) {
+                console.log("_dbg in handleQueryResult 5");
                 output_ar.push('arg name: ' + q.args[i].name + ' ground val: ' + q.args[i].getGrounded() + '\n');
             }
         } else {
+            console.log("_dbg in handleQueryResult 6");
             output_ar.push('Query: ' + q.name + ' was not solved\n');
         }
         if(RuleEngine.choices.length > 0) {
+            console.log("_dbg in handleQueryResult 7");
             if(is_debug) {
                 console.log("_dbg RuleEngine.choices.length: " + RuleEngine.choices.length);
             }
@@ -662,6 +669,7 @@ var RuleEngine = (function () {
             Util.output(output_ar.join(''));
             Util.input(this.handleFindMoreSolutions);
         }
+            console.log("_dbg in handleQueryResult 8");
     };
     return RuleEngine;
 })();
@@ -888,7 +896,7 @@ function onDeviceReady2() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.32</div>
+        <div class="app_button" id="version_button">Version 1.0.33</div>
       </div>
       <div id='output_div'>
       </div>
