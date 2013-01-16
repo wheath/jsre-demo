@@ -236,7 +236,6 @@ var RuleEngine = (function () {
     RuleEngine.is_back_tracking = false;
     RuleEngine.input_cb = undefined;
     RuleEngine.prototype.handleBaseQueryFinish = function () {
-        return;
         if(RuleEngine.async_hold) {
             return;
         }
@@ -855,7 +854,7 @@ function onLoad() {
   document.addEventListener("deviceready", onDeviceReady, true);
 }
 
-function start_re() {
+function onDeviceReady() {
   // Cordova is loaded and it is now safe to make calls Cordova methods
   // Now safe to use the Cordova API
   //window.alert = navigator.notification.alert;
@@ -873,14 +872,14 @@ function start_re() {
 
     <title>JSRE-Demo</title>
   </head>
-<body>
+<body onLoad="onLoad();">
   <header>
-    <h1>JSRE-Demo2</h1>
+    <h1>JSRE-Demo</h1>
   </header>
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.24</div>
+        <div class="app_button" id="version_button">Version 1.0.26</div>
       </div>
       <div id='output_div'>
       </div>
@@ -893,7 +892,7 @@ function start_re() {
       </div>
       <div id='control_div'>
         <form name='control_form' method="POST" onsubmit="return false;">
-          <input type="submit" value="Start Expert System" onclick="start_es();">
+          <input type="submit" value="Start Expert System" onclick="onDeviceReady();">
         </form>
       </div>
     </div>
