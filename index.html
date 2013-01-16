@@ -246,6 +246,7 @@ var RuleEngine = (function () {
         RuleEngine.body_rule_firing = 0;
     }
     RuleEngine.prototype.handleBaseQueryFinish = function () {
+        console.log("_dbg in handleBaseQueryFinish");
         if(RuleEngine.async_hold) {
             return;
         }
@@ -653,6 +654,9 @@ var RuleEngine = (function () {
         }
     };
     RuleEngine.prototype.handleQueryResult = function () {
+        if(is_debug) {
+            console.log("_dbg in handleQueryResult");
+        }
         var q = RuleEngine.base_query;
         var output_ar = [];
         if(this.isQuerySolved(q.args)) {
@@ -669,7 +673,11 @@ var RuleEngine = (function () {
             }
             output_ar.push('There are other possible solutions, should the solver continue?\n');
             Util.output(output_ar.join(''));
+            output_ar = [];
             Util.input(this.handleFindMoreSolutions);
+        }
+        if(output_ar.length > 0) {
+            Util.output(output_ar.join(''));
         }
     };
     return RuleEngine;
@@ -777,6 +785,8 @@ function onDeviceReady() {
   // Now safe to use the Cordova API
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
+  //
+  document.getElementById('submit_btn').disabled = 1;
 
   RuleEngine.reset();
   var re = setup_re();
@@ -786,20 +796,21 @@ function onDeviceReady() {
   RuleEngine.base_query = q_ram;
 
   re.fireRule(q_ram);
+  document.getElementById('submit_btn').disabled = 0;
    
 }
     </script>
 
     <title>JSRE-Demo</title>
   </head>
-<body>
+<body onLoad="onLoad();">
   <header>
     <h1>JSRE-Demo</h1>
   </header>
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.36</div>
+        <div class="app_button" id="version_button">Version 1.0.37</div>
       </div>
       <div id='output_div'>
       </div>
@@ -812,7 +823,7 @@ function onDeviceReady() {
       </div>
       <div id='control_div'>
         <form name='control_form' method="POST" onsubmit="return false;">
-          <input type="submit" value="Start Expert System" onclick="onDeviceReady();">
+          <input type="submit" value="Start Expert System" id="submit_btn" onclick="onDeviceReady();">
         </form>
       </div>
     </div>
