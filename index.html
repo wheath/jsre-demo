@@ -862,6 +862,14 @@ function onDeviceReady() {
   //alert("PhoneGap version 1.0.11");
 
   RuleEngine.re_inst = 0;
+  RuleEngine.rules = [];
+  RuleEngine.choices = [];
+  RuleEngine.body_rules = [];
+  RuleEngine.async_hold = false;
+  RuleEngine.input_cb = 0;
+  RuleEngine.base_query = 0;
+  RuleEngine.rule_firing = 0;
+  RuleEngine.body_rule_firing = 0;
   var re = setup_re();
   var q_ram = new Rule('choose_ram');
   var term_X = new Term('X');
@@ -881,7 +889,7 @@ function onDeviceReady() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.29</div>
+        <div class="app_button" id="version_button">Version 1.0.30</div>
       </div>
       <div id='output_div'>
       </div>
