@@ -229,12 +229,22 @@ var RuleEngine = (function () {
     RuleEngine.rules = [];
     RuleEngine.choices = [];
     RuleEngine.body_rules = [];
-    RuleEngine.rule_firing = null;
-    RuleEngine.body_rule_firing = null;
+    RuleEngine.rule_firing = undefined;
+    RuleEngine.body_rule_firing = undefined;
     RuleEngine.async_hold = false;
-    RuleEngine.base_query = null;
-    RuleEngine.is_back_tracking = false;
+    RuleEngine.base_query = undefined;
     RuleEngine.input_cb = undefined;
+    RuleEngine.reset = function reset() {
+        RuleEngine.re_inst = 0;
+        RuleEngine.rules = [];
+        RuleEngine.choices = [];
+        RuleEngine.body_rules = [];
+        RuleEngine.async_hold = false;
+        RuleEngine.input_cb = 0;
+        RuleEngine.base_query = 0;
+        RuleEngine.rule_firing = 0;
+        RuleEngine.body_rule_firing = 0;
+    }
     RuleEngine.prototype.handleBaseQueryFinish = function () {
         if(RuleEngine.async_hold) {
             return;
@@ -280,7 +290,6 @@ var RuleEngine = (function () {
     RuleEngine.prototype.backTrack = function () {
         var is_backTracked = false;
         var found_choice = undefined;
-        RuleEngine.is_back_tracking = true;
         RuleEngine.rule_firing = undefined;
         RuleEngine.body_rule_firing = undefined;
         RuleEngine.body_rules = [];
@@ -760,26 +769,16 @@ function handle_binary_input() {
 
 
 function onLoad() {
-  //document.addEventListener("deviceready", onDeviceReady, true);
+  document.addEventListener("deviceready", onDeviceReady, true);
 }
 
-function onDeviceReady2() {
+function onDeviceReady() {
   // Cordova is loaded and it is now safe to make calls Cordova methods
   // Now safe to use the Cordova API
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
 
-  /*
-  RuleEngine.re_inst = 0;
-  RuleEngine.rules = [];
-  RuleEngine.choices = [];
-  RuleEngine.body_rules = [];
-  RuleEngine.async_hold = false;
-  RuleEngine.input_cb = 0;
-  RuleEngine.base_query = 0;
-  RuleEngine.rule_firing = 0;
-  RuleEngine.body_rule_firing = 0;
-  */
+  RuleEngine.reset();
   var re = setup_re();
   var q_ram = new Rule('choose_ram');
   var term_X = new Term('X');
@@ -788,7 +787,6 @@ function onDeviceReady2() {
 
   re.fireRule(q_ram);
    
-  //re.handleQueryResult(q_ram);
 }
     </script>
 
@@ -801,7 +799,7 @@ function onDeviceReady2() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.35</div>
+        <div class="app_button" id="version_button">Version 1.0.36</div>
       </div>
       <div id='output_div'>
       </div>
@@ -814,7 +812,7 @@ function onDeviceReady2() {
       </div>
       <div id='control_div'>
         <form name='control_form' method="POST" onsubmit="return false;">
-          <input type="submit" value="Start Expert System" onclick="onDeviceReady2();">
+          <input type="submit" value="Start Expert System" onclick="onDeviceReady();">
         </form>
       </div>
     </div>
