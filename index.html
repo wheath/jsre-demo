@@ -860,26 +860,27 @@ function onDeviceReady() {
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
 
+  RuleEngine.re_inst = 0;
   var re = setup_re();
   var q_ram = new Rule('choose_ram');
   var term_X = new Term('X');
   q_ram.addArg(term_X);
   re.fireRule(q_ram);
    
-  re.handleQueryResult(q_ram);
+  //re.handleQueryResult(q_ram);
 }
     </script>
 
     <title>JSRE-Demo</title>
   </head>
-<body onLoad="onLoad();">
+<body>
   <header>
     <h1>JSRE-Demo</h1>
   </header>
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.26</div>
+        <div class="app_button" id="version_button">Version 1.0.27</div>
       </div>
       <div id='output_div'>
       </div>
