@@ -51,7 +51,7 @@ var Util = (function () {
     }
     return Util;
 })();
-var is_debug = true;
+var is_debug = false;
 var Types = (function () {
     function Types() { }
     Types.types = [];
@@ -644,24 +644,17 @@ var RuleEngine = (function () {
         }
     };
     RuleEngine.prototype.handleQueryResult = function () {
-        console.log("_dbg in handleQueryResult 1");
         var q = RuleEngine.base_query;
-        console.log("_dbg in handleQueryResult 2");
         var output_ar = [];
-        console.log("_dbg in handleQueryResult 3");
         if(this.isQuerySolved(q.args)) {
-            console.log("_dbg in handleQueryResult 4");
             output_ar.push('Query: ' + q.name + ' was solved, solutions are: \n');
             for(var i = 0; i < q.args.length; i++) {
-                console.log("_dbg in handleQueryResult 5");
                 output_ar.push('arg name: ' + q.args[i].name + ' ground val: ' + q.args[i].getGrounded() + '\n');
             }
         } else {
-            console.log("_dbg in handleQueryResult 6");
             output_ar.push('Query: ' + q.name + ' was not solved\n');
         }
         if(RuleEngine.choices.length > 0) {
-            console.log("_dbg in handleQueryResult 7");
             if(is_debug) {
                 console.log("_dbg RuleEngine.choices.length: " + RuleEngine.choices.length);
             }
@@ -669,7 +662,6 @@ var RuleEngine = (function () {
             Util.output(output_ar.join(''));
             Util.input(this.handleFindMoreSolutions);
         }
-            console.log("_dbg in handleQueryResult 8");
     };
     return RuleEngine;
 })();
@@ -747,97 +739,6 @@ function setup_re() {
   return re;
 }
 
-  var re = setup_re();
-  var q_ram = new Rule('choose_ram');
-  var term_X = new Term('X');
-  q_ram.addArg(term_X);
-  RuleEngine.base_query = q_ram;
-
-  re.fireRule(q_ram);
-
-  if(is_debug) {
-    console.log("_dbg after fireRule\n\n\n");
-    console.log("_dbg RuleEngine.body_rule_firing.name: " + RuleEngine.body_rule_firing.name);
-  }
-
-  //re.handleQueryResult(q_ram);
-   
-  //console.log("_dbg first solution term_X.getGrounded(): " + term_X.getGrounded());
-  /*
-  console.log("_dbg num choice points: " + RuleEngine.choices.length);
-  if(term_X2.isGrounded()) {
-    console.log("_dbg pushing first solution");
-    q_human.solutions.push(term_X2.getGrounded());
-  }
-  if(RuleEngine.choices.length >0){ 
-    do {
-      re.backTrack();
-      if(term_X2.isGrounded()) {
-        console.log("_dbg next solution term_X2.getGrounded(): " + term_X2.getGrounded());
-        console.log("_dbg pushing next solution");
-        q_human.solutions.push(term_X2.getGrounded());
-      }
-    } while(RuleEngine.choices.length >0); 
-
-  }
-  console.log("_dbg total solutions found for q_human query: " + q_human.solutions.length);
-    
-  test.equal(q_human.solutions[0], 2);
-  test.equal(q_human.solutions[1], 1);
-  test.done();
-};
-
-exports.testCut = function(test) {
-  var re = new RuleEngine();
-
-  var term_X = new Term('X');
-  var test_rule = new Rule('human');
-  test_rule.addArg(term_X);
-  var test_clause = new Rule('X=2');
-  test_rule.addRule(test_clause);
-  var test_clause = new Rule('!');
-  test_rule.addRule(test_clause);
-
-  re.addRule(test_rule);
-
-  var term_X = new Term('X');
-  var test_rule = new Rule('human');
-  test_rule.addArg(term_X);
-  var test_clause = new Rule('X=1');
-  test_rule.addRule(test_clause);
-
-  re.addRule(test_rule);
-
-  var q_human= new Rule('human');
-  var term_X2 = new Term('X');
-  q_human.addArg(term_X2);
-  re.fireRule(q_human);
- 
-  console.log("_dbg first solution term_X2.getGrounded(): " + term_X2.getGrounded());
-  console.log("_dbg num choice points: " + RuleEngine.choices.length);
-  if(term_X2.isGrounded()) {
-    console.log("_dbg pushing first solution");
-    q_human.solutions.push(term_X2.getGrounded());
-  }
-  if(RuleEngine.choices.length >0){ 
-    do {
-      re.backTrack();
-      if(term_X2.isGrounded()) {
-        console.log("_dbg next solution term_X2.getGrounded(): " + term_X2.getGrounded());
-        console.log("_dbg pushing next solution");
-        q_human.solutions.push(term_X2.getGrounded());
-      }
-    } while(RuleEngine.choices.length >0); 
-
-  }
-  console.log("_dbg total solutions found for q_human query: " + q_human.solutions.length);
-    
-  test.equal(q_human.solutions[0], 2);
-  test.equal(q_human.solutions.length, 1);
-  test.done();
-};
-*/
-
 function handle_binary_input() {
   console.log("_dbg in handle_binary_input");
   var oRadio = document.forms[0].elements['binary_input'];
@@ -868,6 +769,7 @@ function onDeviceReady2() {
   //window.alert = navigator.notification.alert;
   //alert("PhoneGap version 1.0.11");
 
+  /*
   RuleEngine.re_inst = 0;
   RuleEngine.rules = [];
   RuleEngine.choices = [];
@@ -877,6 +779,7 @@ function onDeviceReady2() {
   RuleEngine.base_query = 0;
   RuleEngine.rule_firing = 0;
   RuleEngine.body_rule_firing = 0;
+  */
   var re = setup_re();
   var q_ram = new Rule('choose_ram');
   var term_X = new Term('X');
@@ -898,7 +801,7 @@ function onDeviceReady2() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.34</div>
+        <div class="app_button" id="version_button">Version 1.0.35</div>
       </div>
       <div id='output_div'>
       </div>
