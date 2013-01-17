@@ -2,7 +2,7 @@
 <widget xmlns		= "http://www.w3.org/ns/widgets"
 	xmlns:gap	= "http://phonegap.com/ns/1.0"
 	id		= "com.jsrules.demo"
-	version 	= "1.0.42">
+	version 	= "1.0.43">
 
 	<name>JSRE-Demo</name>
 
