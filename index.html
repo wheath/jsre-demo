@@ -667,6 +667,10 @@ var RuleEngine = (function () {
         if(input_str == 'yes') {
             var re = RuleEngine.getREInst();
             re.backTrack();
+        } else {
+            if(RuleEngine.finished_cb) {
+                RuleEngine.finished_cb();
+            }
         }
     };
     RuleEngine.prototype.handleQueryResult = function () {
@@ -835,7 +839,7 @@ function onDeviceReady() {
   <div id="wrapper">
     <div id="main-content">
       <div align="center">
-        <div class="app_button" id="version_button">Version 1.0.43</div>
+        <div class="app_button" id="version_button">Version 1.0.45</div>
       </div>
       <div id='output_div'>
       </div>
